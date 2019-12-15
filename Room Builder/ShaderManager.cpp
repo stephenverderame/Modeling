@@ -13,10 +13,6 @@ ShaderManager::ShaderManager(const ShaderPasskey & key)
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "svert.glsl", "sfrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "invert.glsl", "sfrag.glsl"));
 	//	pimpl->shaders.emplace_back("invert.glsl", "sfrag.glsl");
-	glUseProgram(pimpl->shaders[0]->getProgram(key));
-	pimpl->shaders[0]->setMat4("projection", glm::perspective(glm::radians(45.0f), 1920.f / 1080.f, 0.01f, 100.f));
-	glUseProgram(pimpl->shaders[1]->getProgram(key));
-	pimpl->shaders[1]->setMat4("projection", glm::perspective(glm::radians(45.0f), 1920.f / 1080.f, 0.01f, 100.f));
 }
 ShaderManager::~ShaderManager()
 {
@@ -25,6 +21,14 @@ ShaderManager::~ShaderManager()
 std::unique_ptr<ShaderManager> ShaderManager::singleton = nullptr;
 void ShaderManager::useShader(unsigned int program)
 {
+	if (activeShader != program) {
+		glUseProgram(program);
+		activeShader = program;
+	}
+}
+void ShaderManager::useShader(shaderID id)
+{
+	unsigned int program = singleton->pimpl->shaders[(int)id]->getProgram(ShaderManager::key);
 	if (activeShader != program) {
 		glUseProgram(program);
 		activeShader = program;

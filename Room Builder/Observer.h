@@ -23,7 +23,13 @@ enum class msg
 	cm_zoom, //[int direction]
 	cm_pan, //[int x, int y]
 	cm_rotate, //[int x, int y]
+	cm_wndSize, //[int w, int h]
+	cm_translateObj, //[int x, int y, int axis]
 	cm_msgs,
+	click, //[int x, int y]
+	sn_select, //[vec4 * pos]
+	sn_translateObj, //[vec3 * deltaPos]
+	sn_msgs,
 	nill = INT_MAX
 };
 struct command

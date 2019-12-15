@@ -145,6 +145,7 @@ Window::Window(const char * title, int width, int height) : hWnd(nullptr), hDc(n
 						if (!gladLoadGL()) errorCode = 500;
 						glEnable(GL_MULTISAMPLE);
 						glEnable(GL_DEPTH_TEST);
+						glEnable(GL_BLEND);
 						SetProcessDPIAware();
 					}
 				}

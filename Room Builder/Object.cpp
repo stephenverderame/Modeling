@@ -66,7 +66,7 @@ struct oImpl
 	std::vector<std::reference_wrapper<ObjectDecorator>> decorators;
 	bool cancelDraw;
 };
-Object::Object()
+Object::Object() : selected(false)
 {
 	pimpl = std::make_unique<oImpl>();
 	pimpl->cancelDraw = false;
@@ -76,7 +76,21 @@ Object::~Object() = default;
 
 void Object::draw()
 {
+	ShaderManager::useShader(sid);
 	nvi_draw();
+}
+
+void Object::select(bool s)
+{
+	selected = s;
+}
+glm::vec3 Object::getPos()
+{
+	glm::vec3 p;
+	p.x = model[3][0];
+	p.y = model[3][1];
+	p.z = model[3][2];
+	return p;
 }
 
 void Object::translate(glm::vec3 & pos)
@@ -140,9 +154,19 @@ Cube::~Cube()
 }
 void Cube::nvi_draw()
 {
-	ShaderManager::getShader(sid)->setMat4("model", model);
 	glBindVertexArray(vao);
-	if(!pimpl->cancelDraw) glDrawArrays(GL_TRIANGLES, 0, 36);
+	if (!pimpl->cancelDraw) {
+		if (selected) {
+			ShaderManager::getShader(sid)->setMat4("model", glm::scale(model, glm::vec3(1.01)));
+			ShaderManager::getShader(sid)->setVec4("color", glm::vec4(0, 0, 1, 1));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		ShaderManager::getShader(sid)->setMat4("model", model);
+		ShaderManager::getShader(sid)->setVec4("color", glm::vec4(1, 0, 0, 1));
+		if(selected) glDisable(GL_DEPTH_TEST);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		if(selected) glEnable(GL_DEPTH_TEST);
+	}
 	for (auto& d : pimpl->decorators) {
 		shaderID custom;
 		if (d.get().useCustomShader(custom))

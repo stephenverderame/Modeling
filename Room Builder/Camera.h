@@ -16,5 +16,6 @@ public:
 	void rotate(float dx, float dy);
 	void notify(const command & msg) override;
 	bool isInterested(msg m) override;
+	void attach(Observer & ob);
 };
 

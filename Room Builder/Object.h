@@ -16,6 +16,7 @@ protected:
 	unsigned int vao;
 	enum class shaderID sid;
 	glm::mat4 model;
+	bool selected;
 	std::unique_ptr<oImpl> pimpl;
 protected:
 	virtual void nvi_draw() = 0;
@@ -33,6 +34,9 @@ public:
 	void transform(glm::mat4 && mat);
 	void clearMatrix();
 	void addDecorator(ObjectDecorator & decorator);
+
+	void select(bool s);
+	glm::vec3 getPos();
 };
 class Cube : public Object
 {

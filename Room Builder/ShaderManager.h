@@ -25,6 +25,7 @@ public:
 	ShaderManager(const ShaderPasskey & key);
 public:
 	static void useShader(unsigned int program);
+	static void useShader(shaderID id);
 	static std::unique_ptr<Shader> & getShader(shaderID id);
 	~ShaderManager();
 };

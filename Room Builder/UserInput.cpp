@@ -7,6 +7,9 @@ struct uiImpl
 {
 	std::vector<std::reference_wrapper<Observer>> observers;
 	bool mButtonDown;
+
+	bool translate;
+	int boundAxis;
 };
 
 void UserInput::notifyInterestedObservers(const command & cmd)
@@ -49,11 +52,50 @@ void UserInput::notify(const message & msg)
 			cmd.args[1] = (void*)(GET_Y_LPARAM(msg.lparam));
 			cmd.cmd = Window::isKeyPress(keyCode::shift) ? msg::cm_pan : msg::cm_rotate;
 		}
+		else if (pimpl->translate) {
+			cmd.args[0] = (void*)(GET_X_LPARAM(msg.lparam));
+			cmd.args[1] = (void*)(GET_Y_LPARAM(msg.lparam));
+			cmd.args[2] = (void*)(pimpl->boundAxis);
+			cmd.cmd = msg::cm_translateObj;
+		}
 		break;
 	case WM_MOUSELEAVE:
-		printf("leave\n");
 		pimpl->mButtonDown = false;
 		break;
+	case WM_LBUTTONDOWN:
+		cmd.cmd = msg::click;
+		cmd.args[0] = (void*)(GET_X_LPARAM(msg.lparam));
+		cmd.args[1] = (void*)(GET_Y_LPARAM(msg.lparam));
+		if (pimpl->translate) pimpl->translate = false;
+		break;
+	case WM_SIZE:
+		cmd.cmd = msg::cm_wndSize;
+		cmd.args[0] = (void*)(LOWORD(msg.lparam));
+		cmd.args[1] = (void*)(HIWORD(msg.lparam));
+		break;
+	case WM_KEYDOWN:
+	{
+		int prevKeyState = msg.lparam >> 30;
+		if (prevKeyState == 0) {//first press
+			switch (msg.wparam) {
+			case (int)keyCode::g:
+				pimpl->translate = !pimpl->translate;
+				pimpl->boundAxis = -1;
+				break;
+			case (int)keyCode::x:
+				if(pimpl->translate) pimpl->boundAxis = 'x';
+				break;
+			case (int)keyCode::y:
+				if (pimpl->translate) pimpl->boundAxis = 'y';
+				break;
+			case (int)keyCode::z:
+				if (pimpl->translate) pimpl->boundAxis = 'z';
+				break;
+			}
+
+		}
+		break;
+	}
 	}
 	notifyInterestedObservers(cmd);
 }
