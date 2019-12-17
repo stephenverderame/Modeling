@@ -5,6 +5,7 @@
 #include "ShaderManager.h"
 #include "Shader.h"
 #include <vector>
+#include "Font.h"
 
 const float cubeVerts[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -97,6 +98,12 @@ void Object::translate(glm::vec3 & pos)
 {
 	model = glm::translate(model, pos);
 }
+void Object::setPos(glm::vec3 & pos)
+{
+	model[3][0] = pos.x;
+	model[3][1] = pos.y;
+	model[3][2] = pos.z;
+}
 void Object::rotate(glm::vec3 & axis, float angle)
 {
 	model = glm::rotate(model, angle, axis);
@@ -112,6 +119,12 @@ void Object::transform(glm::mat4 & mat)
 void Object::translate(glm::vec3 && pos)
 {
 	model = glm::translate(model, pos);
+}
+void Object::setPos(glm::vec3 && pos)
+{
+	model[3][0] = pos.x;
+	model[3][1] = pos.y;
+	model[3][2] = pos.z;
 }
 void Object::rotate(glm::vec3 && axis, float angle)
 {
@@ -311,4 +324,37 @@ bool InstancedObject::useCustomShader(shaderID &newShader)
 {
 	newShader = shaderID::instance;
 	return true;
+}
+
+struct txImpl
+{
+	std::shared_ptr<Font> fnt;
+	const char * txt;
+	float scale;
+	glm::vec4 color;
+};
+
+Text::Text(std::shared_ptr<class Font> fnt)
+{
+	pimpl = std::make_unique<txImpl>();
+	pimpl->fnt = fnt;
+	sid = shaderID::gui;
+}
+Text::~Text() = default;
+
+void Text::nvi_draw()
+{
+	glm::vec3 v = getPos();
+	ShaderManager::getShader(shaderID::gui)->setVec4("color", pimpl->color);
+	pimpl->fnt->drawText(pimpl->txt, v.x, v.y, pimpl->scale);
+}
+
+void Text::setText(const char * txt, float scale)
+{
+	pimpl->txt = txt;
+	pimpl->scale = scale;
+}
+void Text::setColor(glm::vec4 color) 
+{
+	pimpl->color = color;
 }

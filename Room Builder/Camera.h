@@ -7,6 +7,7 @@ class Camera : public Observer
 	std::unique_ptr<camImpl> pimpl;
 private:
 	void updateCam();
+	struct vec4 screenToWorld(struct vec2 mouse);
 public:
 	Camera();
 	~Camera();

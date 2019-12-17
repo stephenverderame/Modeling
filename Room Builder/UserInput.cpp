@@ -10,6 +10,7 @@ struct uiImpl
 
 	bool translate;
 	int boundAxis;
+	bool snapMode;
 };
 
 void UserInput::notifyInterestedObservers(const command & cmd)
@@ -24,6 +25,10 @@ void UserInput::notifyInterestedObservers(const command & cmd)
 UserInput::UserInput()
 {
 	pimpl = std::make_unique<uiImpl>();
+	pimpl->mButtonDown = false;
+	pimpl->translate = false;
+	pimpl->boundAxis = -1;
+	pimpl->snapMode = false;
 }
 
 
@@ -56,6 +61,7 @@ void UserInput::notify(const message & msg)
 			cmd.args[0] = (void*)(GET_X_LPARAM(msg.lparam));
 			cmd.args[1] = (void*)(GET_Y_LPARAM(msg.lparam));
 			cmd.args[2] = (void*)(pimpl->boundAxis);
+			cmd.args[3] = (void*)(pimpl->snapMode);
 			cmd.cmd = msg::cm_translateObj;
 		}
 		break;
@@ -90,6 +96,9 @@ void UserInput::notify(const message & msg)
 				break;
 			case (int)keyCode::z:
 				if (pimpl->translate) pimpl->boundAxis = 'z';
+				break;
+			case (int)keyCode::s:
+				pimpl->snapMode = !pimpl->snapMode;
 				break;
 			}
 

@@ -6,6 +6,18 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtx/matrix_decompose.hpp>
 #include <vector>
+struct vec4
+{
+	glm::vec4 v;
+	operator glm::vec4() { return v; }
+	vec4& operator=(const glm::vec4 & o) { v = o; return *this; }
+};
+struct vec2
+{
+	glm::vec2 v;
+	operator glm::vec2() { return v; }
+	vec2& operator=(const glm::vec2 & o) { v = o; return *this; }
+};
 const glm::vec2 nullVec = glm::vec2(-HUGE_VALF, -HUGE_VALF);
 struct camImpl
 {
@@ -33,6 +45,23 @@ void Camera::updateCam()
 		pimpl->view = glm::lookAt(pimpl->pos, pimpl->target, glm::vec3(0, 1, 0));
 		pimpl->dirtyBit = false;
 	}
+}
+
+vec4 Camera::screenToWorld(vec2 mouse)
+{
+	glm::mat4 inv = pimpl->proj * pimpl->view;
+	inv = glm::inverse(inv);
+	vec4 p;
+	p.v.x = (2.0f * (mouse.v.x / pimpl->screenDims.x)) - 1.f;
+	p.v.y = (2.0f * (mouse.v.y / pimpl->screenDims.y)) - 1.f;
+	p.v.z = 2.0 * pimpl->pos.z - 1.0;
+	p.v.w = 1.0;
+	p.v = inv * p.v;
+	p.v.w = 1.0 / p.v.w;
+	p.v.x *= p.v.w;
+	p.v.y *= p.v.w;
+	p.v.z *= p.v.w;
+	return p;
 }
 
 Camera::Camera()
@@ -139,19 +168,8 @@ void Camera::notify(const command & msg)
 	{
 		float mx = reinterpret_cast<int>(msg.args[0]);
 		float my = reinterpret_cast<int>(msg.args[1]);
-		glm::mat4 inv = pimpl->proj * pimpl->view;
-		inv = glm::inverse(inv);
-		glm::vec4 p;
-		p.x = (2.0f * (mx / pimpl->screenDims.x)) - 1.f;
-		p.y = (2.0f * (my / pimpl->screenDims.y)) - 1.f;
-		p.z = 2.0 * pimpl->pos.z - 1.0;
-		p.w = 1.0;
-		p = inv * p;
-		p.w = 1.0 / p.w;
-		p.x *= p.w;
-		p.y *= p.w;
-		p.z *= p.w;
 		command cmd;
+		glm::vec4 p = screenToWorld(vec2{ glm::vec2{mx, my} });
 		cmd.args[0] = &p;
 		cmd.args[1] = &pimpl->pos;
 		glm::vec3 lookDir = pimpl->pos - pimpl->target;
@@ -168,9 +186,6 @@ void Camera::notify(const command & msg)
 		const glm::vec2 m = { (int)msg.args[0], (int)msg.args[1] };
 		if (pimpl->initialObjTransformMouse != nullVec) {
 			glm::vec2 d = glm::normalize(m - pimpl->initialObjTransformMouse);
-			const float sensitivityConstant = glm::max(glm::distance(pimpl->pos, pimpl->target) * 0.01, 0.0001);
-			d.x *= sensitivityConstant;
-			d.y *= sensitivityConstant;
 			glm::vec3 dP;
 			int axis = (int)msg.args[2];
 			if (axis == -1) {
@@ -186,8 +201,10 @@ void Camera::notify(const command & msg)
 				dP = glm::vec3(0, d.y, 0);
 			}
 			else dP = glm::vec3(0, 0, d.x);
+			dP *= glm::distance(pimpl->target, pimpl->pos) *  0.0035;
 			command cmd;
 			cmd.args[0] = &dP;
+			cmd.args[1] = msg.args[3];
 			cmd.cmd = msg::sn_translateObj;
 			for (auto& o : pimpl->obs) {
 				if (o.get().isInterested(cmd.cmd))

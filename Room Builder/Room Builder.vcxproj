@@ -136,8 +136,11 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\coding stuff\Glad 3.3\src\glad.c" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Compositor.cpp" />
+    <ClCompile Include="Font.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -146,8 +149,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Composable.h" />
+    <ClInclude Include="Compositor.h" />
+    <ClInclude Include="Font.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -155,9 +162,12 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="compositeFrag.glsl" />
+    <None Include="compositeVert.glsl" />
     <None Include="invert.glsl" />
     <None Include="sfrag.glsl" />
     <None Include="svert.glsl" />
+    <None Include="guiFrag.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

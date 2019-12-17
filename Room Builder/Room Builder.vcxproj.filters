@@ -42,6 +42,15 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Compositor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -68,6 +77,18 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Composable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Compositor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="svert.glsl">
@@ -77,6 +98,15 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="invert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="compositeVert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="compositeFrag.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="guiFrag.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

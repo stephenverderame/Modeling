@@ -25,10 +25,12 @@ public:
 	virtual ~Object();
 	void draw();
 	void translate(glm::vec3 & pos);
+	void setPos(glm::vec3 & pos);
 	void rotate(glm::vec3 & axis, float angle);
 	void scale(glm::vec3 & scale);
 	void transform(glm::mat4 & mat);
 	void translate(glm::vec3 && pos);
+	void setPos(glm::vec3 && pos);
 	void rotate(glm::vec3 && axis, float angle);
 	void scale(glm::vec3 && scale);
 	void transform(glm::mat4 && mat);
@@ -85,7 +87,7 @@ class InstancedObject : public ObjectDecorator
 {
 	unsigned int instancedVBO;
 	int instances;
-	shaderID sid;
+	enum class shaderID sid;
 	glm::vec3 * offsets;
 public:
 	InstancedObject(glm::vec3 * offsets, int offsetNum);
@@ -95,6 +97,17 @@ public:
 	bool useCustomShader(enum class shaderID & newShader) override;
 	void setOffset(glm::vec3 offset, int offsetIndex);
 	void init() override;
+};
+struct txImpl;
+class Text : public Object
+{
+	std::unique_ptr<txImpl> pimpl;
+public:
+	Text(std::shared_ptr<class Font> fnt);
+	void nvi_draw() override;
+	void setText(const char * txt, float scale = 1.0);
+	void setColor(glm::vec4 color);
+	~Text();
 };
 
 

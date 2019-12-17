@@ -3,7 +3,7 @@
 struct smImpl;
 enum class shaderID
 {
-	basic, instance
+	basic, instance, compositor, gui
 };
 class Shader;
 class ShaderPasskey
