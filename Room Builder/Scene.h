@@ -14,8 +14,7 @@ protected:
 public:
 	Scene(class RenderTarget & rt);
 	virtual ~Scene();
-	void addObject(std::shared_ptr<class Object> & obj);
-	void addObject(std::shared_ptr<class Object> && obj);
+	void addObject(std::shared_ptr<class Object> obj);
 	void renderScene();
 	void compose() override;
 
@@ -34,5 +33,23 @@ public:
 protected:
 	void renderScenePreconditions() override;
 	void nvi_addObject(std::shared_ptr<class Object> obj) override;
+};
+
+struct gImpl;
+class GuiScene : public Scene, public Observer
+{
+	std::unique_ptr<gImpl> gpimpl;
+	std::shared_ptr<class Font> font;
+public:
+	void clickCallback(int id, const char * name);
+	void addCallback();
+public:
+	void notify(const command & cmd) override;
+	bool isInterested(msg m) override;
+	GuiScene(class RenderTarget & rt, std::shared_ptr<class Font> f, class Scene & sn);
+	~GuiScene();
+protected:
+	void renderScenePreconditions() override;
+	void renderScenePostconditions() override;
 };
 

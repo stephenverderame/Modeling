@@ -33,6 +33,7 @@ public:
 	inline void setVec4i(const char * name, glm::ivec4 v) const { glUniform4i(glGetUniformLocation(program, name), v.x, v.y, v.z, v.w); }
 	inline void setVec3i(const char * name, glm::ivec3 v) const { glUniform3i(glGetUniformLocation(program, name), v.x, v.y, v.z); }
 	inline void setVec2i(const char * name, glm::ivec2 v) const { glUniform2i(glGetUniformLocation(program, name), v.x, v.y); }
+	inline void getVec2i(const char * name, glm::ivec2 & v) const { glGetUniformiv(program, glGetUniformLocation(program, name), (int*)&v); }
 };
 
 

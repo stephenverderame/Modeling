@@ -7,6 +7,7 @@ class Font
 public:
 	Font(const char * fontFile);
 	void drawText(const char * txt, float x, float y, float scale);
+	float getNDCWidth(const char * txt, float scale);
 	~Font();
 };
 

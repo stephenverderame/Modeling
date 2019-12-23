@@ -138,6 +138,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Compositor.cpp" />
     <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Gui.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Composable.h" />
     <ClInclude Include="Compositor.h" />
     <ClInclude Include="Font.h" />
+    <ClInclude Include="Gui.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="RenderTarget.h" />
@@ -164,6 +166,7 @@
   <ItemGroup>
     <None Include="compositeFrag.glsl" />
     <None Include="compositeVert.glsl" />
+    <None Include="guiVert.glsl" />
     <None Include="invert.glsl" />
     <None Include="sfrag.glsl" />
     <None Include="svert.glsl" />

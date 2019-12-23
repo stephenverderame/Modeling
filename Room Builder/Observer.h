@@ -25,11 +25,21 @@ enum class msg
 	cm_rotate, //[int x, int y]
 	cm_wndSize, //[int w, int h]
 	cm_translateObj, //[int x, int y, int axis, bool snap]
+	cm_rotateObj, //[float[1] angle]
 	cm_msgs,
 	click, //[int x, int y]
 	sn_select, //[vec4 * pos]
 	sn_translateObj, //[vec3 * deltaPos, bool snap, vec3 * camPos]
+	sn_rotateObj, //[vec4 * axis + angle]
+	sn_scale, //[float * scale, int axis]
+	sn_delete,
+	sn_deselect,
 	sn_msgs,
+	gui_addDialog,
+	gui_scroll, //[int dir]
+	gui_mouseHover, //[float[2] {x, y}]
+	gui_click, //[float[2] {x, y}]
+	gui_keydown, //[keyCode k]
 	nill = INT_MAX
 };
 struct command

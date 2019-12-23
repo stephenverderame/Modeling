@@ -68,13 +68,19 @@ using wglChoosePixelFormatARB_PROC = BOOL(__stdcall*)(HDC, const int *, const FL
 Window * Window::activeWindow = nullptr;
 int Window::mouseX = 0;
 int Window::mouseY = 0;
-HCURSOR cursors[5];
+HCURSOR cursors[10];
 cursorType Window::activeCursor = cursorType::normal;
 Window::Window(const char * title, int width, int height) : hWnd(nullptr), hDc(nullptr), hRc(nullptr), errorCode(0)
 {
 	pimpl = std::make_unique<winImpl>();
 	cursors[0] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));
 	cursors[1] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_HAND));
+	cursors[2] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_CROSS));
+	cursors[3] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZEALL));
+	cursors[4] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZENS));
+	cursors[5] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZEWE));
+	cursors[6] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZENESW));
+	cursors[7] = LoadCursor(NULL, MAKEINTRESOURCE(IDC_IBEAM));
 	activeWindow = this;
 	WNDCLASSEX wc;
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
@@ -276,4 +282,67 @@ void Window::clear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.2, 0.2, 0.2, 1.0);
+}
+char Window::keyToLetter(keyCode c)
+{
+	char k = 0;
+	switch (c) {
+	case keyCode::semicolon:
+		k = Window::isKeyPress(keyCode::shift) ? ':' : ';';
+		break;
+	case keyCode::equals:
+		k = Window::isKeyPress(keyCode::shift) ? '+' : '=';
+		break;
+	case keyCode::period:
+		k = Window::isKeyPress(keyCode::shift) ? '>' : '.';
+		break;
+	case keyCode::comma:
+		k = Window::isKeyPress(keyCode::shift) ? '<' : ',';
+		break;
+	case keyCode::slash:
+		k = Window::isKeyPress(keyCode::shift) ? '?' : '/';
+		break;
+	case keyCode::backslash:
+		k = Window::isKeyPress(keyCode::shift) ? '|' : '\\';
+		break;
+	case keyCode::quote:
+		k = Window::isKeyPress(keyCode::shift) ? '\"' : '\'';
+		break;
+	case keyCode::tilda:
+		k = Window::isKeyPress(keyCode::shift) ? '~' : '`';
+		break;
+	case (keyCode)'0':
+		k = Window::isKeyPress(keyCode::shift) ? ')' : '0';
+		break;
+	case (keyCode)'1':
+		k = Window::isKeyPress(keyCode::shift) ? '!' : '1';
+		break;
+	case (keyCode)'2':
+		k = Window::isKeyPress(keyCode::shift) ? '@' : '2';
+		break;
+	case (keyCode)'3':
+		k = Window::isKeyPress(keyCode::shift) ? '#' : '3';
+		break;
+	case (keyCode)'4':
+		k = Window::isKeyPress(keyCode::shift) ? '$' : '4';
+		break;
+	case (keyCode)'5':
+		k = Window::isKeyPress(keyCode::shift) ? '%' : '5';
+		break;
+	case (keyCode)'6':
+		k = Window::isKeyPress(keyCode::shift) ? '^' : '6';
+		break;
+	case (keyCode)'7':
+		k = Window::isKeyPress(keyCode::shift) ? '&' : '7';
+		break;
+	case (keyCode)'8':
+		k = Window::isKeyPress(keyCode::shift) ? '*' : '8';
+		break;
+	case (keyCode)'9':
+		k = Window::isKeyPress(keyCode::shift) ? '(' : '9';
+		break;
+	}
+	if (c >= keyCode::n_0 && c <= keyCode::n_9)
+		k = (int)c + '0';
+	return k;
 }

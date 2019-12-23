@@ -7,6 +7,8 @@
 #include "Compositor.h"
 #include "RenderTarget.h"
 #include "Font.h"
+
+#include "Gui.h"
 int main() {
 	Window wnd("Project", 1920, 1080);
 	wnd.show(windowVisibility::show);
@@ -20,20 +22,17 @@ int main() {
 	MultisampledRenderTarget renderGUI(1920, 1080, 16);
 	wnd.attach(renderGUI);
 	MainScene mainScene(render3D);
-	Scene guiScene(renderGUI);
+	auto f = std::make_shared<Font>("C:\\Users\\stephen\\Desktop\\coding stuff\\Fonts\\SignedDistanceArial.fnt");
+	GuiScene guiScene(renderGUI, f, mainScene);
 	mainScene.addObject(cube);
+	ui.attach(guiScene);
+	ui.attach(mainScene);
 	cam.attach(mainScene);
 	auto c2 = std::make_shared<Cube>();
 	c2->translate(glm::vec3(-5, 0, 5));
 	mainScene.addObject(c2);
 	Compositor comp(1920, 1080);
 	wnd.attach(comp);
-	auto f = std::make_shared<Font>("C:\\Users\\stephen\\Desktop\\coding stuff\\Fonts\\SignedDistanceCS.fnt");
-	auto test = std::make_shared<Text>(f);
-	test->setColor(glm::vec4(1.0));
-	test->setPos(glm::vec3(100, 100, 1.0));
-	test->setText("Hello World");
-	guiScene.addObject(test);
 	comp.compose(mainScene);
 	comp.compose(guiScene);
 	while (true) {

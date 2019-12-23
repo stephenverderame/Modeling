@@ -1,6 +1,8 @@
 #include "RenderTarget.h"
 #include <glad/glad.h>
 #include <stdio.h>
+#include "ShaderManager.h"
+#include "Shader.h"
 
 MultisampledRenderTarget::MultisampledRenderTarget(unsigned int width, unsigned int height, unsigned int samples) : samples(samples)
 {
@@ -19,6 +21,8 @@ MultisampledRenderTarget::MultisampledRenderTarget(unsigned int width, unsigned 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	this->width = width;
+	this->height = height;
 }
 
 MultisampledRenderTarget::~MultisampledRenderTarget()
@@ -38,6 +42,7 @@ void MultisampledRenderTarget::bindForWriting()
 void MultisampledRenderTarget::bindForReading()
 {
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+	ShaderManager::getShader(shaderID::compositor)->setInt("samples", samples);
 }
 
 void MultisampledRenderTarget::unBind()
@@ -50,6 +55,8 @@ void MultisampledRenderTarget::notify(const message & cmd)
 	if (cmd.msg == WM_SIZE) {
 		int width = LOWORD(cmd.lparam);
 		int height = HIWORD(cmd.lparam);
+		this->width = width;
+		this->height = height;
 		glDeleteTextures(1, &tex);
 		glDeleteRenderbuffers(1, &rbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);

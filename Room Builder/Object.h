@@ -31,6 +31,8 @@ public:
 	void transform(glm::mat4 & mat);
 	void translate(glm::vec3 && pos);
 	void setPos(glm::vec3 && pos);
+	void setScale(glm::vec3 & scale);
+	void setScale(glm::vec3 && scale);
 	void rotate(glm::vec3 && axis, float angle);
 	void scale(glm::vec3 && scale);
 	void transform(glm::mat4 && mat);
@@ -38,7 +40,9 @@ public:
 	void addDecorator(ObjectDecorator & decorator);
 
 	void select(bool s);
-	glm::vec3 getPos();
+	glm::vec3 getPos() const;
+	glm::mat4 getModel() const { return model; };
+	void setModel(glm::mat4 m) { model = m; }
 };
 class Cube : public Object
 {
@@ -66,7 +70,7 @@ class CompositeObject : public Object {
 public:
 	CompositeObject();
 	~CompositeObject();
-	virtual void addObject(Object & obj);
+	virtual void addObject(std::shared_ptr<Object> obj);
 protected:
 	virtual void nvi_draw() override;
 };
@@ -106,8 +110,26 @@ public:
 	Text(std::shared_ptr<class Font> fnt);
 	void nvi_draw() override;
 	void setText(const char * txt, float scale = 1.0);
+	const char * getText();
 	void setColor(glm::vec4 color);
 	~Text();
 };
+
+class GuiRect : public Object
+{
+	unsigned int vbo;
+	glm::vec4 color;
+	float strokeWidth;
+	glm::vec4 strokeColor;
+protected:
+	void nvi_draw() override;
+public:
+	GuiRect();
+	~GuiRect();
+	void setColor(glm::vec4 c) { color = c; }
+	void setStroke(glm::vec4 c, float width) { strokeWidth = width; strokeColor = c; }
+	void setStroke(float width) { strokeWidth = width; }
+};
+
 
 

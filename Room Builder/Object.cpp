@@ -85,7 +85,7 @@ void Object::select(bool s)
 {
 	selected = s;
 }
-glm::vec3 Object::getPos()
+glm::vec3 Object::getPos() const
 {
 	glm::vec3 p;
 	p.x = model[3][0];
@@ -125,6 +125,18 @@ void Object::setPos(glm::vec3 && pos)
 	model[3][0] = pos.x;
 	model[3][1] = pos.y;
 	model[3][2] = pos.z;
+}
+void Object::setScale(glm::vec3 & scale)
+{
+	model[0][0] = scale.x;
+	model[1][1] = scale.y;
+	model[2][2] = scale.z;
+}
+void Object::setScale(glm::vec3 && scale)
+{
+	model[0][0] = scale.x;
+	model[1][1] = scale.y;
+	model[2][2] = scale.z;
 }
 void Object::rotate(glm::vec3 && axis, float angle)
 {
@@ -224,7 +236,7 @@ void Rect::nvi_draw()
 }
 struct comImpl 
 {
-	std::vector<std::reference_wrapper<Object>> objects;
+	std::vector<std::shared_ptr<Object>> objects;
 };
 CompositeObject::CompositeObject()
 {
@@ -236,12 +248,14 @@ CompositeObject::~CompositeObject() = default;
 void CompositeObject::nvi_draw()
 {
 	for (auto& o : pimpl->objects) {
-		o.get().transform(model);
-		o.get().draw();
+		glm::mat4 m = o->getModel();
+		o->transform(model);
+		o->draw();
+		o->setModel(m);
 	}
 }
 
-void CompositeObject::addObject(Object & obj)
+void CompositeObject::addObject(std::shared_ptr<Object> obj)
 {
 	pimpl->objects.emplace_back(obj);
 }
@@ -329,7 +343,7 @@ bool InstancedObject::useCustomShader(shaderID &newShader)
 struct txImpl
 {
 	std::shared_ptr<Font> fnt;
-	const char * txt;
+	std::string txt;
 	float scale;
 	glm::vec4 color;
 };
@@ -346,7 +360,9 @@ void Text::nvi_draw()
 {
 	glm::vec3 v = getPos();
 	ShaderManager::getShader(shaderID::gui)->setVec4("color", pimpl->color);
-	pimpl->fnt->drawText(pimpl->txt, v.x, v.y, pimpl->scale);
+	ShaderManager::getShader(shaderID::gui)->setBool("text", true);
+	pimpl->fnt->drawText(pimpl->txt.c_str(), v.x, v.y, pimpl->scale);
+	ShaderManager::getShader(shaderID::gui)->setBool("text", false);
 }
 
 void Text::setText(const char * txt, float scale)
@@ -354,7 +370,48 @@ void Text::setText(const char * txt, float scale)
 	pimpl->txt = txt;
 	pimpl->scale = scale;
 }
+const char * Text::getText()
+{
+	return pimpl->txt.c_str();
+}
 void Text::setColor(glm::vec4 color) 
 {
 	pimpl->color = color;
+}
+
+GuiRect::GuiRect()
+{
+	sid = shaderID::gui;
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rectVerts), rectVerts, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+	strokeWidth = 0;
+}
+GuiRect::~GuiRect()
+{
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+}
+void GuiRect::nvi_draw()
+{
+	glDisable(GL_DEPTH_TEST);
+	if (strokeWidth > 0.000000001) {
+		ShaderManager::getShader(sid)->setVec4("color", strokeColor);
+		glm::mat4 m = model; 
+		m = glm::scale(m, glm::vec3(1.0 + strokeWidth / model[0][0], 1.0 + strokeWidth / model[1][1], 1.0));
+		m[3][0] = getPos().x - strokeWidth / 2.0;
+		m[3][1] = getPos().y - strokeWidth / 2.0;
+		ShaderManager::getShader(sid)->setMat4("model", m);
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+	ShaderManager::getShader(sid)->setVec4("color", color);
+	ShaderManager::getShader(sid)->setMat4("model", model);
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glEnable(GL_DEPTH_TEST);
 }

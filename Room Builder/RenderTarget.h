@@ -2,10 +2,13 @@
 #include "Observer.h"
 class RenderTarget : public WindowObserver
 {
+protected:
+	unsigned int width, height;
 public:
 	virtual void bindForWriting() = 0;
 	virtual void bindForReading() = 0;
 	virtual void unBind() = 0;
+	void getDimensions(unsigned int & w, unsigned int & h) { w = width; h = height; }
 };
 class MultisampledRenderTarget : public RenderTarget
 {

@@ -13,7 +13,7 @@ ShaderManager::ShaderManager(const ShaderPasskey & key)
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "svert.glsl", "sfrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "invert.glsl", "sfrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "compositeVert.glsl", "compositeFrag.glsl"));
-	pimpl->shaders.push_back(std::make_unique<Shader>(key, "compositeVert.glsl", "guiFrag.glsl"));
+	pimpl->shaders.push_back(std::make_unique<Shader>(key, "guiVert.glsl", "guiFrag.glsl"));
 	//	pimpl->shaders.emplace_back("invert.glsl", "sfrag.glsl");
 }
 ShaderManager::~ShaderManager()

@@ -214,6 +214,35 @@ void Camera::notify(const command & msg)
 		pimpl->initialObjTransformMouse = m;
 		break;
 	}
+	case msg::cm_rotateObj:
+	{
+		int axis = (int)msg.args[1];
+		glm::vec4 rot;
+		float angle = *(float*)msg.args[0];
+		switch (axis) {
+		case -1:
+			rot = glm::vec4(glm::normalize(pimpl->target - pimpl->pos), angle);
+			break;
+		case 'x':
+			rot = glm::vec4(1, 0, 0, angle);
+			break;
+		case 'y':
+			rot = glm::vec4(0, 1, 0, angle);
+			break;
+		case 'z':
+			rot = glm::vec4(0, 0, 1, angle);
+			break;
+		}
+		command cmd;
+		cmd.cmd = msg::sn_rotateObj;
+		cmd.args[0] = &rot;
+		for (auto& o : pimpl->obs) {
+			if (o.get().isInterested(cmd.cmd))
+				o.get().notify(cmd);
+		}
+		break;
+
+	}
 
 	}
 }

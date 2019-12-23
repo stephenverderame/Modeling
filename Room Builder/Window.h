@@ -27,10 +27,13 @@ enum class keyCode {
 	a = 0x41, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
 	leftWindows, rightWindows,
 	n_0 = 0x60, n_1, n_2, n_3, n_4, n_5, n_6, n_7, n_8, n_9, n_multiply, n_add, n_sep, n_subtract, n_decimal, n_divide,
-	f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12
+	f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12,
+	lshift = 0xA0, rshift, lcontrol, rcontrol, lmenu, rmenu,
+	semicolon = 0xBA, equals, comma, dash, period, slash, tilda,
+	leftBracket = 0xDB, backslash, rightBracket, quote
 };
 enum class cursorType {
-	normal, hand
+	normal, hand, cross, move, move_ud, move_lr, scale, typing
 };
 struct EventListener
 {
@@ -66,5 +69,6 @@ public:
 	static void setCursor(cursorType c);
 	static void getMousePos(int & x, int & y);
 	static bool isKeyPress(keyCode k);
+	static char keyToLetter(keyCode k);
 };
 
