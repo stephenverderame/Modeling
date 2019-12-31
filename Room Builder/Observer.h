@@ -34,6 +34,7 @@ enum class msg
 	sn_scale, //[float * scale, int axis]
 	sn_delete,
 	sn_deselect,
+	sn_next, //int direction (0 is left)
 	sn_msgs,
 	gui_addDialog,
 	gui_scroll, //[int dir]

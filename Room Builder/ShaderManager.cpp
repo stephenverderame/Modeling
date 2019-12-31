@@ -11,10 +11,16 @@ ShaderManager::ShaderManager(const ShaderPasskey & key)
 {
 	pimpl = std::make_unique<smImpl>();
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "svert.glsl", "sfrag.glsl"));
-	pimpl->shaders.push_back(std::make_unique<Shader>(key, "invert.glsl", "sfrag.glsl"));
+	pimpl->shaders.push_back(std::make_unique<Shader>(key, "invert.glsl", "infrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "compositeVert.glsl", "compositeFrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "guiVert.glsl", "guiFrag.glsl"));
 	//	pimpl->shaders.emplace_back("invert.glsl", "sfrag.glsl");
+
+	glUseProgram(pimpl->shaders[(int)shaderID::basic]->getProgram(key));
+	pimpl->shaders[(int)shaderID::basic]->setInt("diffuseTex", 0);
+	pimpl->shaders[(int)shaderID::basic]->setInt("reflectTex", 10);
+	glUseProgram(pimpl->shaders[(int)shaderID::compositor]->getProgram(key));
+	pimpl->shaders[(int)shaderID::compositor]->setInt("texMS", 0);
 }
 ShaderManager::~ShaderManager()
 {

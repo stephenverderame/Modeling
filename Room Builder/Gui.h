@@ -24,7 +24,7 @@ private:
 	int scrollPos;
 	std::function<void(int index, const char * name)> onClick;
 protected:
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 public:
 	GuiList(float x, float y, float w, float h, std::shared_ptr<class Font> f);
 	~GuiList();
@@ -39,7 +39,7 @@ class TextField : public Control
 private:
 	std::unique_ptr<tfImpl> tPimpl;
 protected:
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 public:
 	TextField(float x, float y, float w, float h, std::shared_ptr<class Font> f);
 	~TextField();
@@ -54,7 +54,7 @@ class Button : public Control
 	std::unique_ptr<bImpl> bPimpl;
 	std::function<void()> onClick;
 protected:
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 public:
 	Button(float x, float y, float w, float h, std::shared_ptr<class Font> f);
 	~Button();

@@ -214,6 +214,11 @@ void UserInput::notify(const message & msg)
 					Window::setCursor(cursorType::normal);
 				}
 				break;
+			case (int)keyCode::leftArrow:
+			case (int)keyCode::rightArrow:
+				cmd.cmd = msg::sn_next;
+				cmd.args[0] = (void*)(msg.wparam - (int)keyCode::leftArrow);
+				break;
 			}
 		}
 		if (pimpl->guiShow && cmd.cmd == msg::nill) {

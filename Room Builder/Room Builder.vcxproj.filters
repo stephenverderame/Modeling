@@ -54,6 +54,12 @@
     <ClCompile Include="Gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -95,6 +101,12 @@
     <ClInclude Include="Gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="svert.glsl">
@@ -116,6 +128,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="guiVert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="infrag.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

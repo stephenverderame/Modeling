@@ -5,8 +5,7 @@
 #include <string>
 #include "ShaderManager.h"
 #include "Shader.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "Texture.h"
 const float rectVerts[] =
 {
 	0.0, 1.0,
@@ -21,10 +20,9 @@ struct glyph
 struct fnImpl
 {
 	std::unordered_map<char, glyph> glyphs;
-	int mapWidth, mapHeight, mapComps;
 	int lineHeight;
-	unsigned int mapTexture;
 	unsigned int vao, vbo;
+	Texture map;
 };
 
 Font::Font(const char * fontfile)
@@ -74,24 +72,8 @@ Font::Font(const char * fontfile)
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
-//	stbi_set_flip_vertically_on_load(true);
-	stbi_uc * data = stbi_load(texMap.c_str(), &pimpl->mapWidth, &pimpl->mapHeight, &pimpl->mapComps, 0);
-	glGenTextures(1, &pimpl->mapTexture);
-	glBindTexture(GL_TEXTURE_2D, pimpl->mapTexture);
-	int format = GL_RGBA;
-	switch (pimpl->mapComps) {
-	case 1:
-		format = GL_RED;
-		break;
-	case 3:
-		format = GL_RGB;
-		break;
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, format, pimpl->mapWidth, pimpl->mapHeight, 0, format, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	stbi_image_free(data);
+	pimpl->map.setFlipVertical(false);
+	pimpl->map.loadFromFile(texMap.c_str());
 }
 
 
@@ -101,11 +83,12 @@ Font::~Font()
 
 void Font::drawText(const char * txt, float x, float y, float scale)
 {
-	ShaderManager::getShader(shaderID::gui)->setVec2i("texData", glm::ivec2(pimpl->mapWidth, pimpl->mapHeight));
+	ShaderManager::getShader(shaderID::gui)->setVec2i("texData", glm::ivec2(pimpl->map.getWidth(), pimpl->map.getHeight()));
 	ShaderManager::getShader(shaderID::gui)->setBool("text", true);
 	glm::ivec2 screenSize;
 	ShaderManager::getShader(shaderID::gui)->getVec2i("screenSize", screenSize);
-	glBindTexture(GL_TEXTURE_2D, pimpl->mapTexture);
+	glActiveTexture(GL_TEXTURE0);
+	pimpl->map.bind();
 	glBindVertexArray(pimpl->vao);
 	glDisable(GL_DEPTH_TEST);
 	float lastX = x;

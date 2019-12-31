@@ -2,6 +2,12 @@
 #include <memory>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+enum class renderPass {
+	standard,
+	outline,
+	reflection
+};
+
 class ObjectDecorator {
 public:
 	virtual void decorate(int drawType, int drawStart, int drawCount) = 0;
@@ -17,13 +23,18 @@ protected:
 	enum class shaderID sid;
 	glm::mat4 model;
 	bool selected;
+	bool cancelDraw;
+
+	int decoratorDrawType, decoratorDrawStart, decoratorDrawCount;
+	renderPass requiredPasses;
+protected:
 	std::unique_ptr<oImpl> pimpl;
 protected:
-	virtual void nvi_draw() = 0;
+	virtual void nvi_draw(renderPass p) = 0;
 public:
 	Object();
 	virtual ~Object();
-	void draw();
+	void draw(renderPass p = renderPass::standard);
 	void translate(glm::vec3 & pos);
 	void setPos(glm::vec3 & pos);
 	void rotate(glm::vec3 & axis, float angle);
@@ -43,6 +54,8 @@ public:
 	glm::vec3 getPos() const;
 	glm::mat4 getModel() const { return model; };
 	void setModel(glm::mat4 m) { model = m; }
+	renderPass getRequiredPasses() const { return requiredPasses; }
+	void addRequiredPass(renderPass p) { requiredPasses = (renderPass)((int)requiredPasses | (int)p); }
 };
 class Cube : public Object
 {
@@ -51,7 +64,7 @@ public:
 	Cube();
 	~Cube();
 protected:
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 };
 class Rect : public Object
 {
@@ -62,7 +75,7 @@ public:
 	~Rect();
 	void setOutlineMode(bool outline) { this->outline = outline; }
 protected:
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 };
 struct comImpl;
 class CompositeObject : public Object {
@@ -72,7 +85,7 @@ public:
 	~CompositeObject();
 	virtual void addObject(std::shared_ptr<Object> obj);
 protected:
-	virtual void nvi_draw() override;
+	virtual void nvi_draw(renderPass p) override;
 };
 struct flyImpl;
 class FlyweightObject : public Object {
@@ -85,7 +98,7 @@ public:
 	void setCount(int newCount);
 	int getCount();
 protected:
-	virtual void nvi_draw() override;
+	virtual void nvi_draw(renderPass p) override;
 };
 class InstancedObject : public ObjectDecorator
 {
@@ -108,7 +121,7 @@ class Text : public Object
 	std::unique_ptr<txImpl> pimpl;
 public:
 	Text(std::shared_ptr<class Font> fnt);
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 	void setText(const char * txt, float scale = 1.0);
 	const char * getText();
 	void setColor(glm::vec4 color);
@@ -122,7 +135,7 @@ class GuiRect : public Object
 	float strokeWidth;
 	glm::vec4 strokeColor;
 protected:
-	void nvi_draw() override;
+	void nvi_draw(renderPass p) override;
 public:
 	GuiRect();
 	~GuiRect();

@@ -60,6 +60,7 @@ void Compositor::renderFinal()
 	glDisable(GL_DEPTH_TEST);
 	for (auto in : pimpl->inputs)
 	{
+		glActiveTexture(GL_TEXTURE0);
 		in.get().compose();
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

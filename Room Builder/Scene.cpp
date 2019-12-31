@@ -7,6 +7,7 @@
 #include <glad\glad.h>
 #include "Shader.h"
 #include "ShaderManager.h"
+#include <gtx/matrix_decompose.hpp>
 
 struct sImpl
 {
@@ -19,6 +20,9 @@ struct msImpl
 	std::unique_ptr<Rect> grid;
 	std::unique_ptr<InstancedObject> gridDecorator;
 	size_t selectedObjectIndex;
+
+	std::vector<std::shared_ptr<RenderTarget2D>> reflectionTargets;
+	int refTargets;
 };
 const float MainScene::BASE_UNIT = 0.5;
 Scene::Scene(RenderTarget & rt)
@@ -41,6 +45,7 @@ MainScene::MainScene(RenderTarget & rt) : Scene(rt)
 	mpimpl->gridDecorator = std::make_unique<InstancedObject>(offsets, 10000);
 	mpimpl->grid->addDecorator(*mpimpl->gridDecorator);
 	mpimpl->selectedObjectIndex = ~0;
+	mpimpl->reflectionTargets.push_back(std::make_shared<RenderTarget2D>(1920, 1080, 10));
 }
 
 
@@ -56,21 +61,28 @@ void Scene::addObject(std::shared_ptr<Object> obj)
 void MainScene::nvi_addObject(std::shared_ptr<class Object> obj)
 {
 	mpimpl->objRealPos.push_back(obj->getPos());
+	if ((int)obj->getRequiredPasses() & (int)renderPass::reflection) {
+		printf("Adding reflection target\n");
+		mpimpl->reflectionTargets.push_back(std::make_shared<RenderTarget2D>(1920, 1080, 10));
+	}
 }
 
-void Scene::renderScene()
+void Scene::renderScene(renderPass p)
 {
-	pimpl->rt->bindForWriting();
+	if(p == renderPass::standard) pimpl->rt->bindForWriting();
 	renderScenePreconditions();
-	for (auto o : pimpl->objs)
-		o->draw();
+	for (auto o : pimpl->objs) {
+		if(p == renderPass::standard) renderObjPreconditions(o);
+		o->draw(p);
+	}
 	renderScenePostconditions();
-	pimpl->rt->unBind();
+	if(p == renderPass::standard) pimpl->rt->unBind();
 }
 
 void MainScene::renderScenePreconditions()
 {
 	mpimpl->grid->draw();
+	mpimpl->refTargets = 0;
 }
 void MainScene::notify(const command & cmd)
 {
@@ -147,6 +159,15 @@ void MainScene::notify(const command & cmd)
 		pimpl->objs[mpimpl->selectedObjectIndex]->select(false);
 		mpimpl->selectedObjectIndex = ~0;
 	}
+	else if (cmd.cmd == msg::sn_next) {
+		int dir = (int)cmd.args[0];
+		if (mpimpl->selectedObjectIndex != ~0) {
+			mpimpl->selectedObjectIndex = (mpimpl->selectedObjectIndex + (dir - 1)) % pimpl->objs.size();
+			for (size_t i = 0; i < pimpl->objs.size(); ++i) {
+				pimpl->objs[i]->select(i == mpimpl->selectedObjectIndex ? true : false);
+			}
+		}
+	}
 }
 void Scene::compose()
 {
@@ -172,6 +193,7 @@ GuiScene::GuiScene(RenderTarget & rt, std::shared_ptr<Font> f, class Scene & sn)
 	gpimpl = std::make_unique<gImpl>();
 	gpimpl->addDialog = std::make_unique<GuiList>(0.4, 0.4, 0.1, 0.5, f);
 	gpimpl->addDialog->addItem("Cube");
+	gpimpl->addDialog->addItem("Test");
 	gpimpl->addDialog->setOnClick(std::bind(&GuiScene::clickCallback, this, std::placeholders::_1, std::placeholders::_2));
 	font = f;
 
@@ -253,3 +275,34 @@ void GuiScene::renderScenePostconditions()
 {
 	glEnable(GL_DEPTH_TEST);
 }
+
+void MainScene::handlePasses(float px, float py, float pz)
+{
+	ShaderManager::useShader(shaderID::basic);
+	glm::vec3 playerPos = { px, py, pz };
+	int j = 0;
+	for (int i = 0; i < pimpl->objs.size(); ++i) {
+		if ((int)pimpl->objs[i]->getRequiredPasses() & (int)renderPass::reflection) {
+			glm::vec3 unused;
+			glm::vec4 unused4;
+			glm::quat rotation;
+			glm::decompose(pimpl->objs[i]->getModel(), unused, rotation, unused, unused, unused4);
+			glm::vec3 dir = rotation * glm::vec3(0, 1, 0);
+			glm::mat4 view = glm::lookAt(pimpl->objs[i]->getPos(), playerPos/*pimpl->objs[i]->getPos() + dir*/, glm::vec3(0, 1, 0));
+			ShaderManager::getShader(shaderID::basic)->setMat4("view", view);
+			ShaderManager::getShader(shaderID::instance)->setMat4("view", view);
+			mpimpl->reflectionTargets[j]->bindForWriting();
+			renderScene(renderPass::reflection);
+			mpimpl->reflectionTargets[j++]->unBind();
+		}
+	}
+}
+void MainScene::renderObjPreconditions(std::shared_ptr<class Object> obj)
+{
+	if ((int)obj->getRequiredPasses() & (int)renderPass::reflection)
+	{
+		ShaderManager::useShader(shaderID::basic);
+		mpimpl->reflectionTargets[mpimpl->refTargets++]->bindForReading();
+	}
+}
+

@@ -44,7 +44,7 @@ GuiList::GuiList(float x, float y, float w, float h, std::shared_ptr<Font> f) : 
 }
 GuiList::~GuiList() = default;
 
-void GuiList::nvi_draw()
+void GuiList::nvi_draw(renderPass p)
 {
 	if (visible) {
 		lPimpl->bg->draw();
@@ -55,7 +55,7 @@ void GuiList::nvi_draw()
 		for (auto& txt : lPimpl->labels) {
 			glm::vec3 pos(x, y + h - (CELL_HEIGHT * i++) + lPimpl->top, 0.0);
 			if (pos.y >= y - 0.05 && pos.y < y + h) {
-				if (lPimpl->mx > x && lPimpl->mx < x + w && lPimpl->my > pos.y + CELL_HEIGHT && lPimpl->my < pos.y + 2.0 * CELL_HEIGHT) {
+				if (lPimpl->mx > x && lPimpl->mx < x + w && lPimpl->my >= pos.y && lPimpl->my <= pos.y + CELL_HEIGHT) {
 					if (lPimpl->click) {
 						lPimpl->click = false;
 						if (onClick != nullptr) onClick(i - 2, txt->getText());
@@ -217,7 +217,7 @@ std::string TextField::getText()
 	return tPimpl->txt.str();
 }
 
-void TextField::nvi_draw()
+void TextField::nvi_draw(renderPass p)
 {
 	tPimpl->bg->draw();
 	tPimpl->t->setText(tPimpl->txt.str().c_str());
@@ -246,7 +246,7 @@ struct bImpl
 	std::unique_ptr<GuiRect> bg;
 	bool hover;
 };
-void Button::nvi_draw()
+void Button::nvi_draw(renderPass p)
 {
 	bPimpl->bg->draw();
 	bPimpl->label->draw();

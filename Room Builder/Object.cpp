@@ -65,20 +65,38 @@ const float rectVerts[] = {
 struct oImpl
 {
 	std::vector<std::reference_wrapper<ObjectDecorator>> decorators;
-	bool cancelDraw;
 };
 Object::Object() : selected(false)
 {
 	pimpl = std::make_unique<oImpl>();
-	pimpl->cancelDraw = false;
+	cancelDraw = false;
+	sid = shaderID::basic;
 }
 
 Object::~Object() = default;
 
-void Object::draw()
+void Object::draw(renderPass p)
 {
 	ShaderManager::useShader(sid);
-	nvi_draw();
+	if (selected && p == renderPass::standard) {
+		ShaderManager::getShader(sid)->setMat4("model", glm::scale(model, glm::vec3(1.01)));
+		ShaderManager::getShader(sid)->setVec4("color", glm::vec4(0, 0, 1, 1));
+		glDisable(GL_DEPTH_TEST);
+		nvi_draw(renderPass::outline);
+		glEnable(GL_DEPTH_TEST);
+	}
+	ShaderManager::getShader(sid)->setVec4("color", glm::vec4(1, 0, 0, 1));
+	if (!cancelDraw) {
+		ShaderManager::getShader(sid)->setMat4("model", model);
+		nvi_draw(p);
+	}
+	for (auto& d : pimpl->decorators) {
+		glBindVertexArray(vao);
+		shaderID custom;
+		if (d.get().useCustomShader(custom))
+			ShaderManager::getShader(custom)->setMat4("model", model);
+		d.get().decorate(decoratorDrawType, decoratorDrawStart, decoratorDrawCount);
+	}
 }
 
 void Object::select(bool s)
@@ -156,7 +174,7 @@ void Object::clearMatrix()
 }
 void Object::addDecorator(ObjectDecorator & decorator)
 {
-	if (decorator.overrideDraw()) pimpl->cancelDraw = true;
+	if (decorator.overrideDraw()) cancelDraw = true;
 	pimpl->decorators.emplace_back(decorator);
 	glBindVertexArray(vao);
 	decorator.init();
@@ -171,33 +189,21 @@ Cube::Cube()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	decoratorDrawType = GL_TRIANGLES;
+	decoratorDrawStart = 0;
+	decoratorDrawCount = 36;
 }
 Cube::~Cube()
 {
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 }
-void Cube::nvi_draw()
+void Cube::nvi_draw(renderPass p)
 {
 	glBindVertexArray(vao);
-	if (!pimpl->cancelDraw) {
-		if (selected) {
-			ShaderManager::getShader(sid)->setMat4("model", glm::scale(model, glm::vec3(1.01)));
-			ShaderManager::getShader(sid)->setVec4("color", glm::vec4(0, 0, 1, 1));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-		ShaderManager::getShader(sid)->setMat4("model", model);
-		ShaderManager::getShader(sid)->setVec4("color", glm::vec4(1, 0, 0, 1));
-		if(selected) glDisable(GL_DEPTH_TEST);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		if(selected) glEnable(GL_DEPTH_TEST);
-	}
-	for (auto& d : pimpl->decorators) {
-		shaderID custom;
-		if (d.get().useCustomShader(custom))
-			ShaderManager::getShader(custom)->setMat4("model", model);
-		d.get().decorate(GL_TRIANGLES, 0, 36);
-	}
+//	ShaderManager::getShader(sid)->setMat4("model", model);
+//	ShaderManager::getShader(sid)->setVec4("color", glm::vec4(1, 0, 0, 1));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 Rect::Rect(bool outline) : outline(outline)
@@ -213,26 +219,20 @@ Rect::Rect(bool outline) : outline(outline)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(rectVerts), rectVerts, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	decoratorDrawType = outline ? GL_LINE_LOOP : GL_TRIANGLE_STRIP;
+	decoratorDrawStart = 0;
+	decoratorDrawCount = 4;
 }
 Rect::~Rect()
 {
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 }
-void Rect::nvi_draw()
+void Rect::nvi_draw(renderPass p)
 {
-	ShaderManager::getShader(sid)->setMat4("model", model);
+//	ShaderManager::getShader(sid)->setMat4("model", model);
 	glBindVertexArray(vao);
-	int mode = outline ? GL_LINE_LOOP : GL_TRIANGLE_STRIP;
-	if (!pimpl->cancelDraw) {
-		glDrawArrays(mode, 0, 4);
-	}
-	for (auto& d : pimpl->decorators) {
-		shaderID custom;
-		if (d.get().useCustomShader(custom))
-			ShaderManager::getShader(custom)->setMat4("model", model);
-		d.get().decorate(mode, 0, 4);
-	}
+	glDrawArrays(decoratorDrawType, 0, 4);
 }
 struct comImpl 
 {
@@ -245,7 +245,7 @@ CompositeObject::CompositeObject()
 
 CompositeObject::~CompositeObject() = default;
 
-void CompositeObject::nvi_draw()
+void CompositeObject::nvi_draw(renderPass p)
 {
 	for (auto& o : pimpl->objects) {
 		glm::mat4 m = o->getModel();
@@ -273,7 +273,7 @@ FlyweightObject::FlyweightObject(int count)
 
 FlyweightObject::~FlyweightObject() = default;
 
-void FlyweightObject::nvi_draw()
+void FlyweightObject::nvi_draw(renderPass p)
 {
 	for (auto& mat : pimpl->models) {
 		pimpl->obj->clearMatrix();
@@ -356,7 +356,7 @@ Text::Text(std::shared_ptr<class Font> fnt)
 }
 Text::~Text() = default;
 
-void Text::nvi_draw()
+void Text::nvi_draw(renderPass p)
 {
 	glm::vec3 v = getPos();
 	ShaderManager::getShader(shaderID::gui)->setVec4("color", pimpl->color);
@@ -396,7 +396,7 @@ GuiRect::~GuiRect()
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
 }
-void GuiRect::nvi_draw()
+void GuiRect::nvi_draw(renderPass p)
 {
 	glDisable(GL_DEPTH_TEST);
 	if (strokeWidth > 0.000000001) {

@@ -18,5 +18,6 @@ public:
 	void notify(const command & msg) override;
 	bool isInterested(msg m) override;
 	void attach(Observer & ob);
+	void getPos(float & x, float & y, float & z);
 };
 

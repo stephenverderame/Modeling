@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+
 struct fnImpl;
 class Font
 {

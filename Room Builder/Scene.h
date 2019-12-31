@@ -2,6 +2,7 @@
 #include <memory>
 #include "Observer.h"
 #include "Composable.h"
+#include "Object.h"
 struct sImpl;
 class Scene : public Composable
 {
@@ -11,11 +12,12 @@ protected:
 	virtual void renderScenePreconditions() {};
 	virtual void renderScenePostconditions() {};
 	virtual void nvi_addObject(std::shared_ptr<class Object> obj) {};
+	virtual void renderObjPreconditions(std::shared_ptr<class Object> obj) {};
 public:
 	Scene(class RenderTarget & rt);
 	virtual ~Scene();
 	void addObject(std::shared_ptr<class Object> obj);
-	void renderScene();
+	void renderScene(renderPass p = renderPass::standard);
 	void compose() override;
 
 };
@@ -28,11 +30,13 @@ public:
 public:
 	void notify(const command & cmd) override;
 	bool isInterested(msg m) override;
+	void handlePasses(float px, float py, float pz);
 	MainScene(class RenderTarget & rt);
 	~MainScene();
 protected:
 	void renderScenePreconditions() override;
 	void nvi_addObject(std::shared_ptr<class Object> obj) override;
+	void renderObjPreconditions(std::shared_ptr<class Object> obj) override;
 };
 
 struct gImpl;
