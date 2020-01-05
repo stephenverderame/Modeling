@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -143,6 +143,7 @@
     <ClCompile Include="Compositor.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Gui.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="Compositor.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Gui.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Observer.h" />
@@ -174,6 +176,12 @@
   <ItemGroup>
     <None Include="compositeFrag.glsl" />
     <None Include="compositeVert.glsl" />
+    <None Include="depthFrag.glsl" />
+    <None Include="depthGeom.glsl" />
+    <None Include="depthVert.glsl" />
+    <None Include="furFrag.glsl" />
+    <None Include="furGeom.glsl" />
+    <None Include="furVert.glsl" />
     <None Include="guiVert.glsl" />
     <None Include="infrag.glsl" />
     <None Include="invert.glsl" />

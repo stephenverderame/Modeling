@@ -7,48 +7,49 @@
 #include <vector>
 #include "Font.h"
 
-const float cubeVerts[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+float cubeVerts[] = {
+	// Back face
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, -1.0f,// Bottom-left
+	0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 0.0f, -1.0f,// top-right
+	0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f, 0.0f, -1.0f,// bottom-right         
+	0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 0.0f, -1.0f,// top-right
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, -1.0f,// bottom-left
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f, -1.0f,// top-left
+	 // Front face
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,// bottom-left
+	0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,// bottom-right
+	0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,// top-right
+	0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,// top-right
+	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,// top-left
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,// bottom-left
+	// Left face
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,// top-right
+	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,// top-left
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,// bottom-left
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,// bottom-left
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,// bottom-right
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,// top-right
+	// Right face
+	0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f,  0.0f,// top-left
+	0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f,  0.0f,// bottom-right
+	0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f,  0.0f,// top-right         
+	0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f,  0.0f,// bottom-right
+	0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f,  0.0f,// top-left
+	0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f,  0.0f,// bottom-left     
+	// Bottom face
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  -1.0f,  0.0f,// top-right
+	0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  -1.0f,  0.0f,// top-left
+	0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  -1.0f,  0.0f,// bottom-left
+	0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  -1.0f,  0.0f,// bottom-left
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  -1.0f,  0.0f,// bottom-right
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  -1.0f,  0.0f,// top-right
+	 // Top face
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f,  0.0f,// top-left
+	0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f,  0.0f,// bottom-right
+	0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  1.0f,  0.0f,// top-right     
+	0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f,  0.0f,// bottom-right
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f,  0.0f,// top-left
+	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f// bottom-left        
 };
 const float outlineVerts[] = {
 	0.0, 0.0, 1.0,
@@ -66,23 +67,23 @@ struct oImpl
 {
 	std::vector<std::reference_wrapper<ObjectDecorator>> decorators;
 };
-Object::Object() : selected(false)
+Object::Object() : sid(shaderID::basic), selected(false), visible(true)
 {
 	pimpl = std::make_unique<oImpl>();
 	cancelDraw = false;
-	sid = shaderID::basic;
 }
 
 Object::~Object() = default;
 
-void Object::draw(renderPass p)
+void Object::draw(int p)
 {
+	if (!visible) return;
 	ShaderManager::useShader(sid);
-	if (selected && p == renderPass::standard) {
+	if (selected && p == RENDER_PASS_STANDARD) {
 		ShaderManager::getShader(sid)->setMat4("model", glm::scale(model, glm::vec3(1.01)));
 		ShaderManager::getShader(sid)->setVec4("color", glm::vec4(0, 0, 1, 1));
 		glDisable(GL_DEPTH_TEST);
-		nvi_draw(renderPass::outline);
+		nvi_draw(RENDER_PASS_OUTLINE);
 		glEnable(GL_DEPTH_TEST);
 	}
 	ShaderManager::getShader(sid)->setVec4("color", glm::vec4(1, 0, 0, 1));
@@ -97,6 +98,11 @@ void Object::draw(renderPass p)
 			ShaderManager::getShader(custom)->setMat4("model", model);
 		d.get().decorate(decoratorDrawType, decoratorDrawStart, decoratorDrawCount);
 	}
+}
+
+void Object::setShader(shaderID shader)
+{
+	sid = shader;
 }
 
 void Object::select(bool s)
@@ -188,7 +194,11 @@ Cube::Cube()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	decoratorDrawType = GL_TRIANGLES;
 	decoratorDrawStart = 0;
 	decoratorDrawCount = 36;
@@ -198,7 +208,7 @@ Cube::~Cube()
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 }
-void Cube::nvi_draw(renderPass p)
+void Cube::nvi_draw(int p)
 {
 	glBindVertexArray(vao);
 //	ShaderManager::getShader(sid)->setMat4("model", model);
@@ -228,7 +238,7 @@ Rect::~Rect()
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 }
-void Rect::nvi_draw(renderPass p)
+void Rect::nvi_draw(int p)
 {
 //	ShaderManager::getShader(sid)->setMat4("model", model);
 	glBindVertexArray(vao);
@@ -245,7 +255,7 @@ CompositeObject::CompositeObject()
 
 CompositeObject::~CompositeObject() = default;
 
-void CompositeObject::nvi_draw(renderPass p)
+void CompositeObject::nvi_draw(int p)
 {
 	for (auto& o : pimpl->objects) {
 		glm::mat4 m = o->getModel();
@@ -273,7 +283,7 @@ FlyweightObject::FlyweightObject(int count)
 
 FlyweightObject::~FlyweightObject() = default;
 
-void FlyweightObject::nvi_draw(renderPass p)
+void FlyweightObject::nvi_draw(int p)
 {
 	for (auto& mat : pimpl->models) {
 		pimpl->obj->clearMatrix();
@@ -356,7 +366,7 @@ Text::Text(std::shared_ptr<class Font> fnt)
 }
 Text::~Text() = default;
 
-void Text::nvi_draw(renderPass p)
+void Text::nvi_draw(int p)
 {
 	glm::vec3 v = getPos();
 	ShaderManager::getShader(shaderID::gui)->setVec4("color", pimpl->color);
@@ -396,7 +406,7 @@ GuiRect::~GuiRect()
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
 }
-void GuiRect::nvi_draw(renderPass p)
+void GuiRect::nvi_draw(int p)
 {
 	glDisable(GL_DEPTH_TEST);
 	if (strokeWidth > 0.000000001) {

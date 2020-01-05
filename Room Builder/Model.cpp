@@ -35,11 +35,12 @@ struct Model::mImpl
 	std::string textureDirectory;
 };
 
-void Model::nvi_draw(renderPass p)
+void Model::nvi_draw(int p)
 {
 //	ShaderManager::getShader(sid)->setMat4("model", model);
+	glEnable(GL_CULL_FACE);
 	for (auto& m : mPimpl->meshes) {
-		if (p != renderPass::outline) {
+		if (p != RENDER_PASS_OUTLINE) {
 			for (auto& t : m.texs)
 				t.bind();
 			if (m.mat.name.find("reflect") != std::string::npos) {
@@ -57,7 +58,14 @@ void Model::nvi_draw(renderPass p)
 		glDrawElements(GL_TRIANGLES, m.indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 		ShaderManager::getShader(sid)->setInt("useTex", 0);
+		if (m.mat.name.find("Quilt") != std::string::npos) {
+			ShaderManager::getShader(shaderID::fur)->setMat4("model", model);
+			glBindVertexArray(m.vao);
+			glDrawElements(GL_TRIANGLES, m.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
 	}
+	glDisable(GL_CULL_FACE);
 }
 
 Model::Model(const char * filename)
@@ -191,11 +199,11 @@ void Model::mesh::init()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(offsetof(vertex, pos)));
-//	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(offsetof(vertex, normal)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(offsetof(vertex, normal)));
 //	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(offsetof(vertex, tangent)));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(offsetof(vertex, texCoords)));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-//	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 }

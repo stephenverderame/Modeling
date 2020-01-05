@@ -17,7 +17,7 @@ public:
 	Scene(class RenderTarget & rt);
 	virtual ~Scene();
 	void addObject(std::shared_ptr<class Object> obj);
-	void renderScene(renderPass p = renderPass::standard);
+	void renderScene(int p = RENDER_PASS_STANDARD);
 	void compose() override;
 
 };
@@ -28,9 +28,11 @@ class MainScene : public Scene, public Observer
 public:
 	static const float BASE_UNIT;
 public:
+	using Scene::addObject;
 	void notify(const command & cmd) override;
 	bool isInterested(msg m) override;
-	void handlePasses(float px, float py, float pz);
+	void handlePasses(class Camera & cam);
+	void addObject(std::shared_ptr<class Light> obj);
 	MainScene(class RenderTarget & rt);
 	~MainScene();
 protected:

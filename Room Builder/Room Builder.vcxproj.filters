@@ -60,6 +60,9 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -107,6 +110,9 @@
     <ClInclude Include="Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="svert.glsl">
@@ -131,6 +137,24 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="infrag.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="furGeom.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="furVert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="furFrag.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="depthVert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="depthGeom.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="depthFrag.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

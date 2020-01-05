@@ -44,7 +44,7 @@ GuiList::GuiList(float x, float y, float w, float h, std::shared_ptr<Font> f) : 
 }
 GuiList::~GuiList() = default;
 
-void GuiList::nvi_draw(renderPass p)
+void GuiList::nvi_draw(int p)
 {
 	if (visible) {
 		lPimpl->bg->draw();
@@ -217,7 +217,7 @@ std::string TextField::getText()
 	return tPimpl->txt.str();
 }
 
-void TextField::nvi_draw(renderPass p)
+void TextField::nvi_draw(int p)
 {
 	tPimpl->bg->draw();
 	tPimpl->t->setText(tPimpl->txt.str().c_str());
@@ -246,7 +246,7 @@ struct bImpl
 	std::unique_ptr<GuiRect> bg;
 	bool hover;
 };
-void Button::nvi_draw(renderPass p)
+void Button::nvi_draw(int p)
 {
 	bPimpl->bg->draw();
 	bPimpl->label->draw();

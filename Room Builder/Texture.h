@@ -25,7 +25,7 @@ public:
 	int getChannels() { return channels; }
 	void setFlipVertical(bool f) { flipVertically = f; }
 	void setId(int id) { this->id = id; }
-	void bind();
+	virtual void bind();
 	virtual ~Texture();
 	Texture(const Texture & other) = delete;
 	Texture& operator=(const Texture &) = delete;
@@ -41,5 +41,13 @@ public:
 	SharedTexture(const SharedTexture & other);
 	SharedTexture& operator=(const SharedTexture & other);
 	~SharedTexture();
+};
+class CubeTexture : public Texture
+{
+public:
+	CubeTexture(int id = 0);
+	CubeTexture(const char * filenames[6], int id, bool flip = true);
+	void bind() override;
+	~CubeTexture();
 };
 

@@ -19,6 +19,8 @@ Texture::Texture(int w, int h, int c, int id) : width(w), height(h), channels(c)
 	if (c == 1) format = GL_RED;
 	else if (c == 3) format = GL_RGB;
 	glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 Texture::Texture(int id) : tex(~0), id(id), flipVertically(true)
@@ -44,8 +46,8 @@ void Texture::loadFromFile(const char * filename)
 		break;
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
 }
@@ -76,8 +78,8 @@ void Texture::loadFromData(unsigned int width, unsigned int height, const char *
 		}
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, format, this->width, this->height, 0, format, GL_UNSIGNED_BYTE, fileData);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	if (height == 0)
 		stbi_image_free(fileData);
@@ -151,3 +153,34 @@ SharedTexture::~SharedTexture()
 			glDeleteTextures(1, &tex);
 	}
 }
+
+CubeTexture::CubeTexture(const char * filenames[6], int id, bool flip) : Texture(id)
+{
+	glGenTextures(1, &tex);
+	glActiveTexture(GL_TEXTURE0 + id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	stbi_set_flip_vertically_on_load(flip);
+	for (int i = 0; i < 6; ++i) {
+		stbi_uc * data = stbi_load(filenames[i], &this->width, &this->height, &this->channels, 0);
+		int format = this->channels == 4 ? GL_RGBA : (this->channels == 3 ? GL_RGB : GL_RED);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, this->width, this->height, 0, format, GL_UNSIGNED_BYTE, data);
+		stbi_image_free(data);
+	}
+}
+
+void CubeTexture::bind()
+{
+	glActiveTexture(GL_TEXTURE0 + id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
+}
+
+CubeTexture::~CubeTexture()
+{
+	glDeleteTextures(1, &tex);
+}
+CubeTexture::CubeTexture(int id) : Texture(id) {}

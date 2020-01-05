@@ -14,13 +14,20 @@ ShaderManager::ShaderManager(const ShaderPasskey & key)
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "invert.glsl", "infrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "compositeVert.glsl", "compositeFrag.glsl"));
 	pimpl->shaders.push_back(std::make_unique<Shader>(key, "guiVert.glsl", "guiFrag.glsl"));
+	pimpl->shaders.push_back(std::make_unique<Shader>(key, "furVert.glsl", "furFrag.glsl", "furGeom.glsl"));
+	pimpl->shaders.push_back(std::make_unique<Shader>(key, "depthVert.glsl", "depthFrag.glsl", "depthGeom.glsl"));
 	//	pimpl->shaders.emplace_back("invert.glsl", "sfrag.glsl");
 
 	glUseProgram(pimpl->shaders[(int)shaderID::basic]->getProgram(key));
 	pimpl->shaders[(int)shaderID::basic]->setInt("diffuseTex", 0);
 	pimpl->shaders[(int)shaderID::basic]->setInt("reflectTex", 10);
+	pimpl->shaders[(int)shaderID::basic]->setInt("shadowTex", 5);
 	glUseProgram(pimpl->shaders[(int)shaderID::compositor]->getProgram(key));
 	pimpl->shaders[(int)shaderID::compositor]->setInt("texMS", 0);
+	glUseProgram(pimpl->shaders[(int)shaderID::gui]->getProgram(key));
+	pimpl->shaders[(int)shaderID::gui]->setInt("tex", 0);
+	glUseProgram(pimpl->shaders[(int)shaderID::fur]->getProgram(key));
+	pimpl->shaders[(int)shaderID::gui]->setInt("diffuseTex", 0);
 }
 ShaderManager::~ShaderManager()
 {

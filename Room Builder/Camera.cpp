@@ -257,9 +257,13 @@ void Camera::attach(Observer & ob)
 	pimpl->obs.emplace_back(ob);
 }
 
-void Camera::getPos(float & x, float & y, float & z)
+glm::vec3 Camera::getPos()
 {
-	x = pimpl->pos.x;
-	y = pimpl->pos.y;
-	z = pimpl->pos.z;
+	return pimpl->pos;
+}
+
+glm::mat4 Camera::getViewMatrix()
+{
+	updateCam();
+	return pimpl->view;
 }

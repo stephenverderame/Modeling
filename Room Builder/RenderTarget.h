@@ -37,4 +37,27 @@ public:
 	void unBind() override;
 	void notify(const message & cmd) override;
 };
+class CubemapRenderTarget : public RenderTarget
+{
+	unsigned int fbo, rbo, tex;
+public:
+	CubemapRenderTarget(unsigned int width, unsigned int height, unsigned int activeTexture = 0);
+	~CubemapRenderTarget();
+	void bindForWriting() override;
+	void bindForReading() override;
+	void unBind() override;
+	void notify(const message & cmd) override;
+	void bindOutputFace(int target);
+};
+class OmnidirectionalShadowMap : public RenderTarget
+{
+	unsigned int fbo, depthMap;
+public:
+	OmnidirectionalShadowMap(unsigned int size, unsigned int activeTexture = 5);
+	~OmnidirectionalShadowMap();
+	void bindForWriting() override;
+	void bindForReading() override;
+	void unBind() override;
+	void notify(const message & cmd) override;
+};
 

@@ -6,7 +6,7 @@ class Model : public Object
 	struct mImpl;
 	std::unique_ptr<mImpl> mPimpl;
 protected:
-	void nvi_draw(renderPass p) override;
+	void nvi_draw(int p) override;
 public:
 	Model(const char * filename);
 	~Model();

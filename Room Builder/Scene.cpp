@@ -8,6 +8,12 @@
 #include "Shader.h"
 #include "ShaderManager.h"
 #include <gtx/matrix_decompose.hpp>
+#include "Camera.h"
+#define TESTING_CUBEMAP
+
+#include "Texture.h"
+
+#include "Light.h"
 
 struct sImpl
 {
@@ -21,8 +27,15 @@ struct msImpl
 	std::unique_ptr<InstancedObject> gridDecorator;
 	size_t selectedObjectIndex;
 
+#ifdef TESTING_CUBEMAP
+	std::vector<std::shared_ptr<CubemapRenderTarget>> reflectionTargets;
+#else
 	std::vector<std::shared_ptr<RenderTarget2D>> reflectionTargets;
+#endif
 	int refTargets;
+	std::unique_ptr<CubeTexture> testTex;
+	std::shared_ptr<Light> light;
+
 };
 const float MainScene::BASE_UNIT = 0.5;
 Scene::Scene(RenderTarget & rt)
@@ -45,9 +58,22 @@ MainScene::MainScene(RenderTarget & rt) : Scene(rt)
 	mpimpl->gridDecorator = std::make_unique<InstancedObject>(offsets, 10000);
 	mpimpl->grid->addDecorator(*mpimpl->gridDecorator);
 	mpimpl->selectedObjectIndex = ~0;
-	mpimpl->reflectionTargets.push_back(std::make_shared<RenderTarget2D>(1920, 1080, 10));
+//	mpimpl->reflectionTargets.push_back(std::make_shared<RenderTarget2D>(1920, 1080, 10));
+	const char * filenames[] = {
+		"C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Graphics Notes\\Graphics Notes\\morning_rt.tga",
+		"C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Graphics Notes\\Graphics Notes\\morning_lf.tga",
+		"C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Graphics Notes\\Graphics Notes\\morning_up.tga",
+		"C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Graphics Notes\\Graphics Notes\\morning_dn.tga",
+		"C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Graphics Notes\\Graphics Notes\\morning_ft.tga",
+		"C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Graphics Notes\\Graphics Notes\\morning_bk.tga"
+	};
+	mpimpl->testTex = std::make_unique<CubeTexture>(filenames, 10, false);
 }
 
+void MainScene::addObject(std::shared_ptr<class Light> obj)
+{
+	mpimpl->light = obj;
+}
 
 Scene::~Scene() = default;
 MainScene::~MainScene() = default;
@@ -61,22 +87,25 @@ void Scene::addObject(std::shared_ptr<Object> obj)
 void MainScene::nvi_addObject(std::shared_ptr<class Object> obj)
 {
 	mpimpl->objRealPos.push_back(obj->getPos());
-	if ((int)obj->getRequiredPasses() & (int)renderPass::reflection) {
-		printf("Adding reflection target\n");
+	if ((int)obj->getRequiredPasses() & RENDER_PASS_REFLECTION) {
+#ifdef TESTING_CUBEMAP
+		mpimpl->reflectionTargets.push_back(std::make_shared<CubemapRenderTarget>(1024, 1024, 10));
+#else
 		mpimpl->reflectionTargets.push_back(std::make_shared<RenderTarget2D>(1920, 1080, 10));
+#endif
 	}
 }
 
-void Scene::renderScene(renderPass p)
+void Scene::renderScene(int p)
 {
-	if(p == renderPass::standard) pimpl->rt->bindForWriting();
+	if(p == RENDER_PASS_STANDARD) pimpl->rt->bindForWriting();
 	renderScenePreconditions();
 	for (auto o : pimpl->objs) {
-		if(p == renderPass::standard) renderObjPreconditions(o);
+		/*if(p == renderPass::standard)*/ renderObjPreconditions(o);
 		o->draw(p);
 	}
 	renderScenePostconditions();
-	if(p == renderPass::standard) pimpl->rt->unBind();
+	if(p == RENDER_PASS_STANDARD) pimpl->rt->unBind();
 }
 
 void MainScene::renderScenePreconditions()
@@ -126,6 +155,7 @@ void MainScene::notify(const command & cmd)
 		pimpl->objs.erase(pimpl->objs.begin() + mpimpl->selectedObjectIndex);
 		mpimpl->objRealPos.erase(mpimpl->objRealPos.begin() + mpimpl->selectedObjectIndex);
 		mpimpl->selectedObjectIndex = ~0;
+		printf("Delete object!\n");
 	}
 	else if (cmd.cmd == msg::sn_rotateObj && mpimpl->selectedObjectIndex != ~0) {
 		glm::vec4 rot = *reinterpret_cast<glm::vec4*>(cmd.args[0]);
@@ -276,32 +306,112 @@ void GuiScene::renderScenePostconditions()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void MainScene::handlePasses(float px, float py, float pz)
+void MainScene::handlePasses(Camera & cam)
 {
 	ShaderManager::useShader(shaderID::basic);
-	glm::vec3 playerPos = { px, py, pz };
 	int j = 0;
-	for (int i = 0; i < pimpl->objs.size(); ++i) {
-		if ((int)pimpl->objs[i]->getRequiredPasses() & (int)renderPass::reflection) {
+	for (int i = 0; i < pimpl->objs.size(); ++i) 
+	{
+		if ((int)pimpl->objs[i]->getRequiredPasses() & RENDER_PASS_REFLECTION) 
+		{
 			glm::vec3 unused;
 			glm::vec4 unused4;
 			glm::quat rotation;
 			glm::decompose(pimpl->objs[i]->getModel(), unused, rotation, unused, unused, unused4);
-			glm::vec3 dir = rotation * glm::vec3(0, 1, 0);
-			glm::mat4 view = glm::lookAt(pimpl->objs[i]->getPos(), playerPos/*pimpl->objs[i]->getPos() + dir*/, glm::vec3(0, 1, 0));
+//			glm::vec3 dir = glm::normalize(rotation * glm::vec3(0, 1, 0));
+//			glm::mat4 view = glm::lookAt(pimpl->objs[i]->getPos(), pimpl->objs[i]->getPos() + dir, glm::vec3(0, 1, 0));
+			glm::vec3 normal = glm::transpose(glm::inverse(glm::mat3(pimpl->objs[i]->getModel()))) * glm::vec3(0, -1, 0);// glm::normalize(glm::cross(pimpl->objs[i]->getPos(), glm::vec3(0, 1, 0)));
+//			normal = glm::normalize(normal);
+			glm::vec3 objPos = pimpl->objs[i]->getPos();
+			float D = glm::dot(objPos, normal);
+			glm::mat4 reflectionMatrix = {
+				{1 - 2 * normal.x * normal.x, -2 * normal.x * normal.y, -2 * normal.x * normal.z, -2 * normal.x * D},
+				{-2 * normal.x * normal.y, 1 - 2 * normal.y * normal.y, -2 * normal.y * normal.z, -2 * normal.y * D},
+				{-2 * normal.x * normal.z, -2 * normal.y * normal.z, 1 - 2 * normal.z * normal.z, -2 * normal.z * D},
+				{0, 0, 0, 1}
+			};
+			glm::vec3 viewPos = reflectionMatrix * glm::vec4(cam.getPos(), 1.0);
+			glm::vec3 dir = glm::normalize(viewPos - pimpl->objs[i]->getPos());
+			glm::mat4 view = reflectionMatrix * cam.getViewMatrix() * glm::inverse(reflectionMatrix);
+//			glm::mat4 view = glm::lookAt(viewPos, pimpl->objs[i]->getPos(), glm::vec3(0, 1, 0));
+			ShaderManager::getShader(shaderID::basic)->setMat4("view", cam.getViewMatrix());
+			ShaderManager::getShader(shaderID::instance)->setMat4("view", cam.getViewMatrix());
+			mpimpl->reflectionTargets[j]->bindForWriting();
+#ifndef TESTING_CUBEMAP
+/*			glEnable(GL_STENCIL_TEST);
+			glClear(GL_STENCIL_BUFFER_BIT);
+			glStencilFunc(GL_NEVER, 0, 0xFF);
+			glStencilOp(GL_INCR, GL_KEEP, GL_KEEP);
+			glColorMask(0, 0, 0, 0);
+			glDisable(GL_DEPTH_TEST);
+			pimpl->objs[i]->draw();
+			glColorMask(1, 1, 1, 1);
+			glEnable(GL_DEPTH_TEST);
+			glStencilFunc(GL_LEQUAL, 1, 0xFF);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);*/
+			glm::vec3 up = normal == glm::vec3(0, -1, 0) ? glm::vec3(0, 0, 1) : (normal == glm::vec3(0, 1, 0) ? glm::vec3(0, 0, -1) : glm::vec3(0, 1, 0));
+			view = glm::lookAt(pimpl->objs[i]->getPos(), pimpl->objs[i]->getPos() + normal, up);
+			unsigned int w, h;
+			mpimpl->reflectionTargets[j]->getDimensions(w, h);
+			glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)w / h, 0.1f, 500.f);
+			ShaderManager::getShader(shaderID::basic)->setMat4("projection", proj);
+			ShaderManager::getShader(shaderID::instance)->setMat4("projection", proj);
 			ShaderManager::getShader(shaderID::basic)->setMat4("view", view);
 			ShaderManager::getShader(shaderID::instance)->setMat4("view", view);
-			mpimpl->reflectionTargets[j]->bindForWriting();
+//			ShaderManager::getShader(shaderID::basic)->setBool("clip", true);
+//			ShaderManager::getShader(shaderID::basic)->setVec4("clipPlane", glm::vec4(normal, D));
+			pimpl->objs[i]->setVisible(false);
 			renderScene(renderPass::reflection);
+			pimpl->objs[i]->setVisible(true);
+//			ShaderManager::getShader(shaderID::basic)->setBool("clip", false);
+//			glDisable(GL_STENCIL_TEST);
+#else
+			glm::vec3 vectors[] = {
+				{1, 0, 0},
+				{-1, 0, 0},
+				{0, 1, 0},
+				{0, -1, 0},
+				{0, 0, 1},
+				{0, 0, -1}
+			};
+			glm::vec3 ups[] = {
+				{0, 1, 0},
+				{0, 1, 0},
+				{0, 0, 1},
+				{0, 0, -1},
+				{0, 1, 0},
+				{0, 1, 0}
+			};
+			pimpl->objs[i]->setVisible(false);
+			ShaderManager::getShader(shaderID::basic)->setMat4("projection", glm::perspective(glm::radians(90.f), 1.f, 0.1f, 100.f));
+			ShaderManager::getShader(shaderID::instance)->setMat4("projection", glm::perspective(glm::radians(90.f), 1.f, 0.1f, 100.f));
+			ShaderManager::getShader(shaderID::basic)->setVec3("objNormal", normal);
+			ShaderManager::getShader(shaderID::basic)->setVec3("camPos", cam.getPos());
+//			ShaderManager::getShader(shaderID::basic)->setMat4("projection", glm::ortho(0.f, 1000.f, 0.f, 1000.f, .1f, 500.f));
+			for (int k = 0; k < 6; ++k) {
+				glm::mat4 view = glm::lookAt(pimpl->objs[i]->getPos(), pimpl->objs[i]->getPos() + vectors[k], ups[k]);
+				ShaderManager::getShader(shaderID::basic)->setMat4("view", view);
+				ShaderManager::getShader(shaderID::instance)->setMat4("view", view);
+				mpimpl->reflectionTargets[j]->bindOutputFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X + k);
+				renderScene(RENDER_PASS_REFLECTION);
+			}
+			pimpl->objs[i]->setVisible(true);
+#endif
 			mpimpl->reflectionTargets[j++]->unBind();
+			
 		}
+	}
+	if (mpimpl->light != nullptr)
+	{
+		mpimpl->light->prepareDepthPass();
+		renderScene(RENDER_PASS_SHADOW);
+		mpimpl->light->finishDepthPass();
 	}
 }
 void MainScene::renderObjPreconditions(std::shared_ptr<class Object> obj)
 {
-	if ((int)obj->getRequiredPasses() & (int)renderPass::reflection)
+	if (obj->isVisible() && obj->getRequiredPasses() & RENDER_PASS_REFLECTION)
 	{
-		ShaderManager::useShader(shaderID::basic);
 		mpimpl->reflectionTargets[mpimpl->refTargets++]->bindForReading();
 	}
 }

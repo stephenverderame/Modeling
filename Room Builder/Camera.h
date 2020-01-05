@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Observer.h"
+#include <glm.hpp>
 struct camImpl;
 class Camera : public Observer
 {
@@ -18,6 +19,7 @@ public:
 	void notify(const command & msg) override;
 	bool isInterested(msg m) override;
 	void attach(Observer & ob);
-	void getPos(float & x, float & y, float & z);
+	glm::vec3 getPos();
+	glm::mat4 getViewMatrix();
 };
 

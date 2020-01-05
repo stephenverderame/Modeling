@@ -2,11 +2,10 @@
 #include <memory>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
-enum class renderPass {
-	standard,
-	outline,
-	reflection
-};
+constexpr int RENDER_PASS_STANDARD = 0b0;
+constexpr int RENDER_PASS_OUTLINE = 0b1;
+constexpr int RENDER_PASS_REFLECTION = 0b10;
+constexpr int RENDER_PASS_SHADOW = 0b100;
 
 class ObjectDecorator {
 public:
@@ -26,15 +25,16 @@ protected:
 	bool cancelDraw;
 
 	int decoratorDrawType, decoratorDrawStart, decoratorDrawCount;
-	renderPass requiredPasses;
+	int requiredPasses;
+	bool visible;
 protected:
 	std::unique_ptr<oImpl> pimpl;
 protected:
-	virtual void nvi_draw(renderPass p) = 0;
+	virtual void nvi_draw(int p) = 0;
 public:
 	Object();
 	virtual ~Object();
-	void draw(renderPass p = renderPass::standard);
+	void draw(int p = RENDER_PASS_STANDARD);
 	void translate(glm::vec3 & pos);
 	void setPos(glm::vec3 & pos);
 	void rotate(glm::vec3 & axis, float angle);
@@ -49,13 +49,16 @@ public:
 	void transform(glm::mat4 && mat);
 	void clearMatrix();
 	void addDecorator(ObjectDecorator & decorator);
+	void setVisible(bool v) { visible = v; }
+	bool isVisible() { return visible; }
+	void setShader(enum class shaderID shader);
 
 	void select(bool s);
 	glm::vec3 getPos() const;
 	glm::mat4 getModel() const { return model; };
 	void setModel(glm::mat4 m) { model = m; }
-	renderPass getRequiredPasses() const { return requiredPasses; }
-	void addRequiredPass(renderPass p) { requiredPasses = (renderPass)((int)requiredPasses | (int)p); }
+	int getRequiredPasses() const { return requiredPasses; }
+	void addRequiredPass(int p) { requiredPasses |= p; }
 };
 class Cube : public Object
 {
@@ -64,7 +67,7 @@ public:
 	Cube();
 	~Cube();
 protected:
-	void nvi_draw(renderPass p) override;
+	void nvi_draw(int p) override;
 };
 class Rect : public Object
 {
@@ -75,7 +78,7 @@ public:
 	~Rect();
 	void setOutlineMode(bool outline) { this->outline = outline; }
 protected:
-	void nvi_draw(renderPass p) override;
+	void nvi_draw(int p) override;
 };
 struct comImpl;
 class CompositeObject : public Object {
@@ -85,7 +88,7 @@ public:
 	~CompositeObject();
 	virtual void addObject(std::shared_ptr<Object> obj);
 protected:
-	virtual void nvi_draw(renderPass p) override;
+	virtual void nvi_draw(int p) override;
 };
 struct flyImpl;
 class FlyweightObject : public Object {
@@ -98,7 +101,7 @@ public:
 	void setCount(int newCount);
 	int getCount();
 protected:
-	virtual void nvi_draw(renderPass p) override;
+	virtual void nvi_draw(int p) override;
 };
 class InstancedObject : public ObjectDecorator
 {
@@ -121,7 +124,7 @@ class Text : public Object
 	std::unique_ptr<txImpl> pimpl;
 public:
 	Text(std::shared_ptr<class Font> fnt);
-	void nvi_draw(renderPass p) override;
+	void nvi_draw(int p) override;
 	void setText(const char * txt, float scale = 1.0);
 	const char * getText();
 	void setColor(glm::vec4 color);
@@ -135,7 +138,7 @@ class GuiRect : public Object
 	float strokeWidth;
 	glm::vec4 strokeColor;
 protected:
-	void nvi_draw(renderPass p) override;
+	void nvi_draw(int p) override;
 public:
 	GuiRect();
 	~GuiRect();

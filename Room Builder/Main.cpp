@@ -9,6 +9,10 @@
 #include "Font.h"
 #include "Model.h"
 
+#include "Shader.h"
+#include <time.h>
+#include "Light.h"
+
 int main() {
 	Window wnd("Project", 1920, 1080);
 	wnd.show(windowVisibility::show);
@@ -31,11 +35,23 @@ int main() {
 //	m->scale(glm::vec3(0.001));
 	m->scale(glm::vec3(0.01));
 	mirror->scale(glm::vec3(0.01));
-	mirror->addRequiredPass(renderPass::reflection);
+	mirror->addRequiredPass(RENDER_PASS_REFLECTION);
 	GuiScene guiScene(renderGUI, f, mainScene);
+	auto test = std::make_shared<Cube>();
+	test->translate(glm::vec3(3));
+	test->scale(glm::vec3(0.8));
+	test->setShader(shaderID::fur);
+	auto l = std::make_shared<Light>();
+	l->translate(glm::vec3(0, 5, 0));
+	auto floor = std::make_shared<Rect>();
+	floor->rotate(glm::vec3(1, 0, 0), glm::radians(90.f));
+	floor->scale(glm::vec3(20));
+	mainScene.addObject(floor);
 	mainScene.addObject(cube);
 	mainScene.addObject(m);
 	mainScene.addObject(mirror);
+	mainScene.addObject(test);
+	mainScene.addObject(l);
 	ui.attach(guiScene);
 	ui.attach(mainScene);
 	cam.attach(mainScene);
@@ -47,13 +63,13 @@ int main() {
 	comp.compose(mainScene);
 	comp.compose(guiScene);
 	while (true) {
+		ShaderManager::getShader(shaderID::fur)->setFloat("time", (float)clock() / CLOCKS_PER_SEC);
 		wnd.pollEvents();
 		wnd.clear();
-		glm::vec3 cp;
-		cam.getPos(cp.x, cp.y, cp.z);
-		mainScene.handlePasses(cp.x, cp.y, cp.z);
+		mainScene.handlePasses(cam);
 		cam.setViewMatrix(shaderID::basic);
 		cam.setViewMatrix(shaderID::instance);
+		cam.setViewMatrix(shaderID::fur);
 		mainScene.renderScene();
 		guiScene.renderScene();
 		comp.renderFinal();
